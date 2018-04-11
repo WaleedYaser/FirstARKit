@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 namespace UnityEngine.XR.iOS
 {
@@ -24,6 +25,15 @@ namespace UnityEngine.XR.iOS
             return false;
         }
 		
+		private bool IsPointerOverUI()
+		{
+			PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
+			eventDataCurrentPosition.position = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+			List<RaycastResult> results = new List<RaycastResult>();
+			EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+			return results.Count > 0;
+		}
+
 		// Update is called once per frame
 		void Update () {
 			#if UNITY_EDITOR   //we will only use this script on the editor side, though there is nothing that would prevent it from working on device
@@ -46,7 +56,7 @@ namespace UnityEngine.XR.iOS
 			if (Input.touchCount > 0 && m_HitTransform != null)
 			{
 				var touch = Input.GetTouch(0);
-				if (touch.phase == TouchPhase.Began || touch.phase == TouchPhase.Moved)
+				if ((touch.phase == TouchPhase.Began || touch.phase == TouchPhase.Moved) && ! IsPointerOverUI())
 				{
 					var screenPosition = Camera.main.ScreenToViewportPoint(touch.position);
 					ARPoint point = new ARPoint {
